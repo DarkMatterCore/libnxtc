@@ -82,6 +82,7 @@ static int nxtcEntrySortFunction(const void *a, const void *b);
 
 static bool g_nxtcInit = false;
 static Mutex g_nxtcMutex = 0;
+static u32 g_nxtcRefCount = 0;
 
 static const SetLanguage g_defaultSystemLanguage = SetLanguage_ENUS;    // Default to American English.
 static SetLanguage g_systemLanguage = g_defaultSystemLanguage;
@@ -162,6 +163,9 @@ bool nxtcInitialize(void)
         ret = g_nxtcInit = true;
     }
 
+    /* Increment ref counter if we successfully init. */
+    if (ret) g_nxtcRefCount++;
+
     return ret;
 }
 
@@ -169,8 +173,12 @@ void nxtcExit(void)
 {
     SCOPED_LOCK(&g_nxtcMutex)
     {
-        /* Check if the interface has already been initialized. */
+        /* Check if the interface has not been initialized. */
         if (!g_nxtcInit) break;
+
+        /* Decrement ref counter, if non-zero, then do not close nxtc. */
+        g_nxtcRefCount--;
+        if (g_nxtcRefCount) break;
 
         /* Write title cache file and free our title cache. */
         nxtcFreeTitleCache(true);
