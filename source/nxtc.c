@@ -80,8 +80,8 @@ static int nxtcEntrySortFunction(const void *a, const void *b);
 
 /* Global variables. */
 
-static bool g_nxtcInit = false;
 static Mutex g_nxtcMutex = 0;
+static u32 g_nxtcRefCount = 0;
 
 static const SetLanguage g_defaultSystemLanguage = SetLanguage_ENUS;    // Default to American English.
 static SetLanguage g_systemLanguage = g_defaultSystemLanguage;
@@ -143,7 +143,7 @@ bool nxtcInitialize(void)
     SCOPED_LOCK(&g_nxtcMutex)
     {
         /* Check if the interface has already been initialized. */
-        ret = g_nxtcInit;
+        ret = g_nxtcRefCount > 0;
         if (ret) break;
 
         /* Start new log session. */
@@ -157,10 +157,10 @@ bool nxtcInitialize(void)
 
         /* Load title cache file. */
         nxtcLoadFile();
-
-        /* Update flags. */
-        ret = g_nxtcInit = true;
     }
+
+    /* Increment ref counter if we successfully init. */
+    if (ret) g_nxtcRefCount++;
 
     return ret;
 }
@@ -169,8 +169,12 @@ void nxtcExit(void)
 {
     SCOPED_LOCK(&g_nxtcMutex)
     {
-        /* Check if the interface has already been initialized. */
-        if (!g_nxtcInit) break;
+        /* Check if the interface has not been initialized. */
+        if (!g_nxtcRefCount) break;
+
+        /* Decrement ref counter, if non-zero, then do not close nxtc. */
+        g_nxtcRefCount--;
+        if (g_nxtcRefCount) break;
 
         /* Write title cache file and free our title cache. */
         nxtcFreeTitleCache(true);
@@ -181,9 +185,6 @@ void nxtcExit(void)
 
         /* Close logfile. */
         nxtcLogCloseLogFile();
-
-        /* Update flags. */
-        g_nxtcInit = g_cacheFlushRequired = false;
     }
 }
 
@@ -304,7 +305,7 @@ bool nxtcGetCacheLanguage(SetLanguage *out_lang)
 
     SCOPED_LOCK(&g_nxtcMutex)
     {
-        if (!g_nxtcInit || !out_lang) {
+        if (!g_nxtcRefCount || !out_lang) {
             NXTC_LOG_MSG("Invalid parameters!");
             break;
         }
@@ -327,7 +328,7 @@ void nxtcWipeCache(void)
     SCOPED_LOCK(&g_nxtcMutex)
     {
         /* Check if the interface has already been initialized. */
-        if (!g_nxtcInit) break;
+        if (!g_nxtcRefCount) break;
 
         /* Free our title cache. */
         nxtcFreeTitleCache(false);
@@ -623,7 +624,7 @@ static void nxtcSaveFile(void)
 
     bool success = false;
 
-    if (!g_nxtcInit || !g_titleCache || !g_titleCacheCount)
+    if (!g_nxtcRefCount || !g_titleCache || !g_titleCacheCount)
     {
         NXTC_LOG_MSG("Invalid parameters!");
         return;
@@ -1084,7 +1085,7 @@ NX_INLINE u32 nxtcCalculateDataBlobSize(u16 name_len, u16 publisher_len, u32 ico
 
 static NxTitleCacheApplicationMetadata *_nxtcGetApplicationMetadataEntryById(u64 title_id)
 {
-    if (!g_nxtcInit || !g_titleCache || !g_titleCacheCount || !title_id) return NULL;
+    if (!g_nxtcRefCount || !g_titleCache || !g_titleCacheCount || !title_id) return NULL;
 
     for(u32 i = 0; i < g_titleCacheCount; i++)
     {
