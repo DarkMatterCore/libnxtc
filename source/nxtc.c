@@ -186,24 +186,25 @@ bool nxtcInitialize(void)
     SCOPED_LOCK(&g_nxtcMutex)
     {
         /* Check if the interface has already been initialized. */
-        ret = g_nxtcRefCount > 0;
-        if (ret) break;
+        if (!g_nxtcRefCount)
+        {
+            /* Start new log session. */
+            NXTC_LOG_MSG(LIB_TITLE " v%u.%u.%u starting. Built on " BUILD_TIMESTAMP ".", LIBNXTC_VERSION_MAJOR, LIBNXTC_VERSION_MINOR, LIBNXTC_VERSION_MICRO);
 
-        /* Start new log session. */
-        NXTC_LOG_MSG(LIB_TITLE " v%u.%u.%u starting. Built on " BUILD_TIMESTAMP ".", LIBNXTC_VERSION_MAJOR, LIBNXTC_VERSION_MINOR, LIBNXTC_VERSION_MICRO);
+            /* Get system language. */
+            nxtcGetSystemLanguage();
 
-        /* Get system language. */
-        nxtcGetSystemLanguage();
+            /* Get placeholder string. */
+            g_curPlaceholderString = nxtcGetPlaceholderString();
 
-        /* Get placeholder string. */
-        g_curPlaceholderString = nxtcGetPlaceholderString();
+            /* Load title cache file. */
+            nxtcLoadFile();
+        }
 
-        /* Load title cache file. */
-        nxtcLoadFile();
+        /* Update flags. */
+        ret = true;
+        g_nxtcRefCount++;
     }
-
-    /* Increment ref counter if we successfully init. */
-    if (ret) g_nxtcRefCount++;
 
     return ret;
 }
