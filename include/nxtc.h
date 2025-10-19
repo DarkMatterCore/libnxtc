@@ -25,8 +25,9 @@ extern "C" {
 /// Provides a way for the library to return application metadata for a specific title.
 typedef struct {
     u64 title_id;       ///< Title ID from the application this data belongs to.
-    char *name;         ///< NULL-terminated UTF-8 title name string in the system language.
-    char *publisher;    ///< NULL-terminated UTF-8 title publisher string in the system language.
+    u8 language;        ///< SetLanguage value that represents the language used for this cache entry.
+    char *name;         ///< NULL-terminated UTF-8 title name string.
+    char *publisher;    ///< NULL-terminated UTF-8 title publisher string.
     size_t icon_size;   ///< JPEG icon size.
     void *icon_data;    ///< JPEG icon data.
 } NxTitleCacheApplicationMetadata;

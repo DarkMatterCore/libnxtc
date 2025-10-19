@@ -7,6 +7,27 @@
 
 #define NS_APPLICATION_RECORD_BLOCK_SIZE    1024
 
+static const char* g_langNames[SetLanguage_Total] = {
+    [SetLanguage_JA]     = "Japanese",
+    [SetLanguage_ENUS]   = "American English",
+    [SetLanguage_FR]     = "French",
+    [SetLanguage_DE]     = "German",
+    [SetLanguage_IT]     = "Italian",
+    [SetLanguage_ES]     = "Spanish",
+    [SetLanguage_ZHCN]   = "Simplified Chinese",
+    [SetLanguage_KO]     = "Korean",
+    [SetLanguage_NL]     = "Dutch",
+    [SetLanguage_PT]     = "Portuguese",
+    [SetLanguage_RU]     = "Russian",
+    [SetLanguage_ZHTW]   = "Traditional Chinese",
+    [SetLanguage_ENGB]   = "British English",
+    [SetLanguage_FRCA]   = "Canadian French",
+    [SetLanguage_ES419]  = "Latin American Spanish",
+    [SetLanguage_ZHHANS] = "Simplified Chinese",
+    [SetLanguage_ZHHANT] = "Traditional Chinese",
+    [SetLanguage_PTBR]   = "Brazilian Portuguese"
+};
+
 static bool utilsGetApplicationIds(u64 **out_application_ids, u32 *out_application_id_count)
 {
     Result rc = 0;
@@ -119,10 +140,12 @@ NX_INLINE void utilsPrintApplicationMetadataInfo(NxTitleCacheApplicationMetadata
 {
     printf("\t\t- %016lX: OK!\n" \
            "\t\t\t- Source: %s\n" \
+           "\t\t\t- Language: %u (%s)\n" \
            "\t\t\t- Name: %s\n" \
            "\t\t\t- Publisher: %s\n" \
            "\t\t\t- Icon size: 0x%lX\n", \
-           app_metadata->title_id, is_cache ? "cache" : "ns", app_metadata->name, app_metadata->publisher, app_metadata->icon_size);
+           app_metadata->title_id, is_cache ? "cache" : "ns", app_metadata->language, g_langNames[app_metadata->language], \
+           app_metadata->name, app_metadata->publisher, app_metadata->icon_size);
 }
 
 static bool utilsGetApplicationMetadata(u64 application_id)
