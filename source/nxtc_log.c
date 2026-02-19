@@ -1,7 +1,7 @@
 /*
  * nxtc_log.c
  *
- * Copyright (c) 2025, DarkMatterCore <pabloacurielz@gmail.com>.
+ * Copyright (c) 2025-2026, DarkMatterCore <pabloacurielz@gmail.com>.
  *
  * This file is part of libnxtc (https://github.com/DarkMatterCore/libnxtc).
  */

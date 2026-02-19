@@ -7,7 +7,7 @@
 
 #define NS_APPLICATION_RECORD_BLOCK_SIZE    1024
 
-static const char* g_langNames[SetLanguage_Total] = {
+static const char* g_langNames[SetLanguage_New_Total] = {
     [SetLanguage_JA]     = "Japanese",
     [SetLanguage_ENUS]   = "American English",
     [SetLanguage_FR]     = "French",
@@ -25,7 +25,9 @@ static const char* g_langNames[SetLanguage_Total] = {
     [SetLanguage_ES419]  = "Latin American Spanish",
     [SetLanguage_ZHHANS] = "Simplified Chinese",
     [SetLanguage_ZHHANT] = "Traditional Chinese",
-    [SetLanguage_PTBR]   = "Brazilian Portuguese"
+    [SetLanguage_PTBR]   = "Brazilian Portuguese",
+    [SetLanguage_PL]     = "Polish",
+    [SetLanguage_TH]     = "Thai"
 };
 
 static bool utilsGetApplicationIds(u64 **out_application_ids, u32 *out_application_id_count)

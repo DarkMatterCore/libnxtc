@@ -1,7 +1,7 @@
 /*
  * nxtc_utils.h
  *
- * Copyright (c) 2025, DarkMatterCore <pabloacurielz@gmail.com>.
+ * Copyright (c) 2025-2026, DarkMatterCore <pabloacurielz@gmail.com>.
  *
  * This file is part of libnxtc (https://github.com/DarkMatterCore/libnxtc).
  */
@@ -22,6 +22,7 @@
 #include <math.h>
 #include <assert.h>
 #include <nxtc.h>
+#include <zlib.h>
 
 #include "nxtc_log.h"
 
@@ -56,6 +57,9 @@ void *nxtcUtilsAlignedAlloc(size_t alignment, size_t size);
 
 /// Trims whitespace characters from the provided string.
 void nxtcUtilsTrimString(char *str);
+
+/// Decompresses a zlib stream using input/output buffers and a window bits value.
+bool nxtcUtilsZlibDecompress(void* dst, size_t dst_sz, const void* src, size_t src_sz, int wbits);
 
 /// Wrappers used in scoped locks.
 NX_INLINE NxtcUtilsScopedLock nxtcUtilsLockScope(Mutex *mtx)

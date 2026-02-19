@@ -70,7 +70,7 @@ ASFLAGS		:=	-g $(ARCH)
 LDFLAGS		=	-specs=$(DEVKITPRO)/libnx/switch.specs -g $(ARCH) -Wl,-Map,$(notdir $*.map)
 
 # Use -lnxtc instead of -lnxtcd to use the regular library build without debug logging.
-LIBS		:=	-lnxtcd -lnx
+LIBS		:=	-lz -lnxtcd -lnx
 
 #---------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level containing

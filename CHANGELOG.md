@@ -1,5 +1,23 @@
 # Changelog
 
+v0.0.3:
+--------------
+
+### API changes:
+
+* Add `language` field to `NxTitleCacheApplicationMetadata`, which represents the `SetLanguage` value associated with a title entry.
+
+### Internal changes:
+
+* Add support for Polish and Thai languages.
+* Add support for NACPs with zlib-compressed language entries (e.g. TLoZ BotW 1.9.0).
+* Add a reverse lookup table `g_nacpReverseLangTable`, which is used to map NacpLanguageEntry indexes to SetLanguage values.
+
+### Changes to example code:
+
+* Add support for Polish and Thai languages.
+* Display the language of each retrieved title entry.
+
 v0.0.2:
 --------------
 

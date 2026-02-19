@@ -42,6 +42,7 @@ This section assumes you've already built the library by following the steps fro
 
 1. Update the `Makefile` from your homebrew application to reference the library.
     * Two different builds can be generated: a release build (`-lnxtc`) and a debug build with logging enabled (`-lnxtcd`).
+    * This library depends on zlib, so make sure to link your application against `-lz`, too.
     * In case you need to report any bugs, please make sure you're using the debug build and provide its logfile.
 2. Include the `nxtc.h` header file somewhere in your code.
 3. Initialize the title cache interface with `nxtcInitialize()`.
