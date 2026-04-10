@@ -229,6 +229,9 @@ void nxtcExit(void)
 
         /* Close logfile. */
         nxtcLogCloseLogFile();
+
+        /* Update flags. */
+        g_cacheFlushRequired = false;
     }
 }
 
