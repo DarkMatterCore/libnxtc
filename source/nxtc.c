@@ -97,8 +97,8 @@ static int nxtcEntrySortFunction(const void *a, const void *b);
 
 /* Global variables. */
 
-static bool g_nxtcInit = false;
 static Mutex g_nxtcMutex = 0;
+static u32 g_nxtcRefCount = 0;
 
 static const SetLanguage g_defaultSystemLanguage = SetLanguage_ENUS;    // Default to American English.
 static SetLanguage g_systemLanguage = g_defaultSystemLanguage;
@@ -186,23 +186,24 @@ bool nxtcInitialize(void)
     SCOPED_LOCK(&g_nxtcMutex)
     {
         /* Check if the interface has already been initialized. */
-        ret = g_nxtcInit;
-        if (ret) break;
+        if (!g_nxtcRefCount)
+        {
+            /* Start new log session. */
+            NXTC_LOG_MSG(LIB_TITLE " v%u.%u.%u starting. Built on " BUILD_TIMESTAMP ".", LIBNXTC_VERSION_MAJOR, LIBNXTC_VERSION_MINOR, LIBNXTC_VERSION_MICRO);
 
-        /* Start new log session. */
-        NXTC_LOG_MSG(LIB_TITLE " v%u.%u.%u starting. Built on " BUILD_TIMESTAMP ".", LIBNXTC_VERSION_MAJOR, LIBNXTC_VERSION_MINOR, LIBNXTC_VERSION_MICRO);
+            /* Get system language. */
+            nxtcGetSystemLanguage();
 
-        /* Get system language. */
-        nxtcGetSystemLanguage();
+            /* Get placeholder string. */
+            g_curPlaceholderString = nxtcGetPlaceholderString();
 
-        /* Get placeholder string. */
-        g_curPlaceholderString = nxtcGetPlaceholderString();
-
-        /* Load title cache file. */
-        nxtcLoadFile();
+            /* Load title cache file. */
+            nxtcLoadFile();
+        }
 
         /* Update flags. */
-        ret = g_nxtcInit = true;
+        ret = true;
+        g_nxtcRefCount++;
     }
 
     return ret;
@@ -212,8 +213,12 @@ void nxtcExit(void)
 {
     SCOPED_LOCK(&g_nxtcMutex)
     {
-        /* Check if the interface has already been initialized. */
-        if (!g_nxtcInit) break;
+        /* Check if the interface has not been initialized. */
+        if (!g_nxtcRefCount) break;
+
+        /* Decrement ref counter, if non-zero, then do not close nxtc. */
+        g_nxtcRefCount--;
+        if (g_nxtcRefCount) break;
 
         /* Write title cache file and free our title cache. */
         nxtcFreeTitleCache(true);
@@ -226,7 +231,7 @@ void nxtcExit(void)
         nxtcLogCloseLogFile();
 
         /* Update flags. */
-        g_nxtcInit = g_cacheFlushRequired = false;
+        g_cacheFlushRequired = false;
     }
 }
 
@@ -364,7 +369,7 @@ bool nxtcGetCacheLanguage(SetLanguage *out_lang)
 
     SCOPED_LOCK(&g_nxtcMutex)
     {
-        if (!g_nxtcInit || !out_lang) {
+        if (!g_nxtcRefCount || !out_lang) {
             NXTC_LOG_MSG("Invalid parameters!");
             break;
         }
@@ -387,7 +392,7 @@ void nxtcWipeCache(void)
     SCOPED_LOCK(&g_nxtcMutex)
     {
         /* Check if the interface has already been initialized. */
-        if (!g_nxtcInit) break;
+        if (!g_nxtcRefCount) break;
 
         /* Free our title cache. */
         nxtcFreeTitleCache(false);
@@ -683,7 +688,7 @@ static void nxtcSaveFile(void)
 
     bool success = false;
 
-    if (!g_nxtcInit || !g_titleCache || !g_titleCacheCount)
+    if (!g_nxtcRefCount || !g_titleCache || !g_titleCacheCount)
     {
         NXTC_LOG_MSG("Invalid parameters!");
         return;
@@ -1143,13 +1148,13 @@ static NacpLanguageEntry *nxtcDecompressNacpTitleBlock(const NacpStruct *nacp)
     /* Short-circuit: copy the uncompressed title entries to our allocated buffer if we're not dealing with any compression. */
     if (!is_compressed)
     {
-        memcpy(out, nacp->lang, sizeof(nacp->lang));
+        memcpy(out, nacp->lang_data.lang, sizeof(nacp->lang_data.lang));
         goto end;
     }
 
     /* Get compressed block. */
-    const u16 compressed_blob_size = *((const u16*)nacp->lang);
-    const u8 *compressed_blob = ((const u8*)nacp->lang + 2);
+    const u16 compressed_blob_size = nacp->lang_data.compressed_data.buffer_size;
+    const u8 *compressed_blob = (const u8*)nacp->lang_data.compressed_data.buffer;
 
     NXTC_LOG_DATA(compressed_blob, compressed_blob_size, "Decompressing title block for %016lX (size 0x%X):", nacp->save_data_owner_id, compressed_blob_size);
 
@@ -1200,7 +1205,7 @@ NX_INLINE u32 nxtcCalculateDataBlobSize(u16 name_len, u16 publisher_len, u32 ico
 
 static NxTitleCacheApplicationMetadata *_nxtcGetApplicationMetadataEntryById(u64 title_id)
 {
-    if (!g_nxtcInit || !g_titleCache || !g_titleCacheCount || !title_id) return NULL;
+    if (!g_nxtcRefCount || !g_titleCache || !g_titleCacheCount || !title_id) return NULL;
 
     for(u32 i = 0; i < g_titleCacheCount; i++)
     {
