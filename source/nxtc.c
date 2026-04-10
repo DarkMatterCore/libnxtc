@@ -1148,13 +1148,13 @@ static NacpLanguageEntry *nxtcDecompressNacpTitleBlock(const NacpStruct *nacp)
     /* Short-circuit: copy the uncompressed title entries to our allocated buffer if we're not dealing with any compression. */
     if (!is_compressed)
     {
-        memcpy(out, nacp->lang, sizeof(nacp->lang));
+        memcpy(out, nacp->lang_data.lang, sizeof(nacp->lang_data.lang));
         goto end;
     }
 
     /* Get compressed block. */
-    const u16 compressed_blob_size = *((const u16*)nacp->lang);
-    const u8 *compressed_blob = ((const u8*)nacp->lang + 2);
+    const u16 compressed_blob_size = nacp->lang_data.compressed_data.buffer_size;
+    const u8 *compressed_blob = (const u8*)nacp->lang_data.compressed_data.buffer;
 
     NXTC_LOG_DATA(compressed_blob, compressed_blob_size, "Decompressing title block for %016lX (size 0x%X):", nacp->save_data_owner_id, compressed_blob_size);
 
