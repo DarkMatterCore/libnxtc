@@ -86,6 +86,8 @@ NX_INLINE void nxtcFreeApplicationMetadata(NxTitleCacheApplicationMetadata **app
     *app_metadata = NULL;
 }
 
+NacpLanguageEntry *nxtcDecompressNacpTitleBlock(const NacpStruct *nacp);
+
 #ifdef __cplusplus
 }
 #endif
