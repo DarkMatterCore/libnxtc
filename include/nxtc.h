@@ -86,6 +86,8 @@ NX_INLINE void nxtcFreeApplicationMetadata(NxTitleCacheApplicationMetadata **app
     *app_metadata = NULL;
 }
 
+/// Provides a pointer to a dynamically allocated NacpLanguageEntry buffer with the decompressed LanguageEntry from the provided NacpStruct element.
+/// Returns NULL if the provided NacpStruct pointer is invalid or if an error occurs when decompressing.
 NacpLanguageEntry *nxtcDecompressNacpTitleBlock(const NacpStruct *nacp);
 
 #ifdef __cplusplus
