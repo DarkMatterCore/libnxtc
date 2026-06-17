@@ -85,8 +85,6 @@ static void nxtcFreeTitleCache(bool flush);
 
 static bool nxtcAppendDataBlobToFileCacheBuffer(u8 **cache_file_data, const NxTitleCacheApplicationMetadata *cache_entry, NxTitleCacheFileEntry *cache_file_entry, u32 *out_blob_offset, size_t *out_cur_offset);
 
-static NacpLanguageEntry *nxtcDecompressNacpTitleBlock(const NacpStruct *nacp);
-
 static const NacpLanguageEntry *nxtcGetNacpLanguageEntry(const NacpLanguageEntry *lang_entries, u8 *out_lang);
 
 NX_INLINE u32 nxtcCalculateDataBlobSize(u16 name_len, u16 publisher_len, u32 icon_size);
@@ -1126,7 +1124,7 @@ end:
     return success;
 }
 
-static NacpLanguageEntry *nxtcDecompressNacpTitleBlock(const NacpStruct *nacp)
+NacpLanguageEntry *nxtcDecompressNacpTitleBlock(const NacpStruct *nacp)
 {
     if (!nacp)
     {
